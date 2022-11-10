@@ -1,6 +1,7 @@
-var words = ["GREEN", "BLUE", "RED", "YELLOW"];
-var colors = ["#00FF00", "#0000FF", "#FF0000", "#FFFF00"];
-var trials = 5;
+import * as THREE from 'three';
+
+
+const trials = 15;
 var trialnum = 0;
 var correctcount = 0;
 var start_exp=0;
@@ -8,14 +9,93 @@ var accept_click=0;
 var endTime;
 var startTime;
 
+var TargetLocation
 var time = [];
 
-const colorDict = {
-    g: "#00FF00",
-    b: "#0000FF",
-    r: "#FF0000",
-    y: "#FFFF00",
+const pointer = new THREE.Vector2();
+const raycaster = new THREE.Raycaster();
+
+const onMouseMove = (event) => {
+    pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+    pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    raycaster.setFromCamera(pointer, camera);
+    const intersects = raycaster.intersectObjects(scene.children);
+    if (intersects.length > 0) {
+        const intersect = intersects[0];
+        TargetLocation = intersect.point;
+        console.log(TargetLocation);
+    }
 };
+window.addEventListener('mousemove' , onMouseMove);
+window.addEventListener('click' , onMouseClick);
+
+const onMouseClick = (event) => {
+    if (accept_click==1){
+        endTime = new Date();
+        time.push(endTime-startTime);
+        console.log(time);
+        if (TargetLocation.x > 0 && TargetLocation.z > 0){
+            correctcount += 1;
+        }
+        if (trialnum < trials){
+            trialnum += 1;
+            accept_click=0;
+            start_exp=0;
+            document.getElementById("trial").innerHTML = trialnum;
+            
+        }
+        else{
+            document.getElementById("trial").innerHTML = "Done";
+            document.getElementById("correct").innerHTML = correctcount;
+            document.getElementById("time").innerHTML = time;
+        }
+    }
+};
+
+
+class mouseaim {
+    constructor() {
+        this.crosshair = new THREE.Mesh(
+            new THREE.RingGeometry(0.02, 0.04, 32),
+            new THREE.MeshBasicMaterial({
+                color: 0xffffff,
+                opacity: 0.5,
+                transparent: true
+            })
+        );
+        this.crosshair.position.z = -1;
+        scene.add(this.crosshair);
+    }
+
+    update() {
+        const {
+            x,
+            y
+        } = mouse;
+        this.crosshair.position.set(x, y, -1);
+    }
+}
+
+class target {
+    constructor() {
+        this.geometry = new THREE.SphereGeometry(0.1, 32, 32);
+        this.material = new THREE.MeshBasicMaterial({
+            color: 0xff0000
+        });
+        this.sphere = new THREE.Mesh(this.geometry, this.material);
+        scene.add(this.sphere);
+        this.sphere.position.set(0, 0, -1);
+    }
+
+    update() {
+        const {
+            x,
+            y
+        } = mouse;
+        this.sphere.position.set(x, y, -1);
+    }
+}
+
 document.getElementById("count").innerHTML = correctcount;
 
 function getRandom(items) {
@@ -105,6 +185,7 @@ document.addEventListener("keydown", function (f) {
     }
 });
 
+
 function setup() {
     window.canvas = document.getElementById("experiment");
     window.ctx = window.canvas.getContext("2d");
@@ -115,7 +196,7 @@ function setup() {
 
 function instructions() {
     writeText(
-        "Press key 'g' for 'green', 'b' for 'blue, 'r' for 'red, 'y' for 'yellow.' Ignore the word's meaning. Press Space to start."
+        "Click on the Targets as they appear on the screen. Press the spacebar to start the experiment."
     );
 }
 
@@ -123,4 +204,3 @@ function main() {
     setup();
     instructions();
 }
-

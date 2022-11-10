@@ -1,21 +1,17 @@
-var words = ["GREEN", "BLUE", "RED", "YELLOW"];
-var colors = ["#00FF00", "#0000FF", "#FF0000", "#FFFF00"];
-var trials = 5;
-var trialnum = 0;
-var correctcount = 0;
+var correcttime = 0;
 var start_exp=0;
 var accept_click=0;
 var endTime;
 var startTime;
+var direction
+
+const DelayTime = 5000
+const TotalTime = 20000;
+const speed = 1000;
 
 var time = [];
 
-const colorDict = {
-    g: "#00FF00",
-    b: "#0000FF",
-    r: "#FF0000",
-    y: "#FFFF00",
-};
+
 document.getElementById("count").innerHTML = correctcount;
 
 function getRandom(items) {
@@ -123,4 +119,3 @@ function main() {
     setup();
     instructions();
 }
-
